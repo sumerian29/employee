@@ -1,0 +1,196 @@
+import os
+from datetime import datetime
+
+# تعريف معايير التقييم
+CRITERIA = {
+    "الذكاء السياقي (20 نقطة)": [
+        "قراءة المشهد التنظيمي غير الرسمي",
+        "التكيّف مع التحولات المفاجئة",
+        "ربط المعلومات المبعثرة"
+    ],
+    "التأثير النظامي (25 نقطة)": [
+        "تأثيره المضاعف على أداء الفريق/القسم",
+        "بناء رأس مال فكري",
+        "تبسيط عمليات جوهرية"
+    ],
+    "الذكاء المستقبلي (20 نقطة)": [
+        "توقع مخاطر غير ظاهرة",
+        "ابتكار استباقي",
+        "تبنّي تقنيات/منهجيات ناشئة"
+    ],
+    "القيادة الخفية (15 نقطة)": [
+        "حشد فرق دون سلطة رسمية",
+        "تحويل النزاعات إلى فرص ابتكار",
+        "تمثيل قيم المؤسسة في القرارات الصعبة"
+    ],
+    "الصلابة المعرفية (20 نقطة)": [
+        "تحليل الفشل لاستخراج مبادئ جديدة",
+        "اتخاذ قرارات فعالة مع نقص المعلومات",
+        "إدارة التحيزات الشخصية في القرارات"
+    ]
+}
+
+# دالة للتحقق من صحة الدرجات
+def validate_score(score):
+    try:
+        score = int(score)
+        if 0 <= score <= 5:
+            return score
+        return -1
+    except ValueError:
+        return -1
+
+# دالة لتوليد التقرير
+def generate_report(employee_data, scores, examples, impact_factor):
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    filename = f"تقرير_تقييم_{employee_data['اسم الموظف']}_{timestamp}.txt"
+    total_raw = sum(sum(category_scores) for category_scores in scores.values())
+    final_score = min(100, (total_raw * impact_factor) * 100 / 112.5)  # تحويل لمقياس 100
+    
+    with open(filename, 'w', encoding='utf-8') as f:
+        f.write("="*60 + "\n")
+        f.write(f"      تقرير تقييم متقدم - الموظف المثالي\n")
+        f.write(f"      التاريخ: {datetime.now().strftime('%Y/%m/%d')}\n")
+        f.write("="*60 + "\n\n")
+        
+        f.write(f"■ معلومات الموظف:\n")
+        f.write(f"  - الاسم: {employee_data['اسم الموظف']}\n")
+        f.write(f"  - الوظيفة: {employee_data['الوظيفة']}\n")
+        f.write(f"  - القسم: {employee_data['القسم']}\n")
+        f.write(f"  - تاريخ التقييم: {employee_data['تاريخ التقييم']}\n\n")
+        
+        f.write("■ نتائج التقييم:\n")
+        for category, subcriteria in CRITERIA.items():
+            f.write(f"\n{category}:\n")
+            for i, criterion in enumerate(subcriteria):
+                score = scores[category][i]
+                example = examples[category][i]
+                f.write(f"  - {criterion}: {score}/5\n")
+                f.write(f"    مثال/دليل: {example}\n")
+        
+        f.write("\n" + "="*60 + "\n")
+        f.write(f"  المجموع الخام: {total_raw}/75\n")
+        f.write(f"  معامل الأثر: {impact_factor}\n")
+        f.write(f"  النتيجة النهائية: {final_score:.1f}/100\n")
+        f.write("="*60 + "\n\n")
+        
+        f.write("■ توقيعات المقيمين:\n")
+        f.write("  1. _________________________ (المدير المباشر)\n")
+        f.write("  2. _________________________ (زميل من قسم آخر)\n")
+        f.write("  3. _________________________ (عميل داخلي)\n\n")
+        
+        f.write("■ تعليمات ختامية:\n")
+        f.write("- يحفظ هذا التقرير في ملف الموظف الشخصي\n")
+        f.write("- تعاد مراجعة التقييم بعد 6 أشهر\n")
+        f.write(f"- تاريخ المراجعة القادمة: {employee_data['تاريخ المراجعة القادمة']}\n")
+        f.write("\n" + "="*60 + "\n")
+        f.write("© نظام التقييم المتقدم - إصدار 2024\n")
+    
+    return filename
+
+# دالة رئيسية
+def main():
+    print("\n" + "="*60)
+    print("      نظام تقييم الموظف المثالي المتقدم")
+    print("="*60 + "\n")
+    
+    # جمع بيانات الموظف
+    employee_data = {
+        "اسم الموظف": input("■ اسم الموظف: "),
+        "الوظيفة": input("■ المسمى الوظيفي: "),
+        "القسم": input("■ القسم/الإدارة: "),
+        "تاريخ التقييم": input("■ تاريخ التقييم (YYYY/MM/DD): "),
+        "تاريخ المراجعة القادمة": input("■ تاريخ المراجعة القادمة (YYYY/MM/DD): ")
+    }
+    
+    scores = {}
+    examples = {}
+    
+    # جمع التقييمات
+    print("\n" + "="*60)
+    print("■ مرحلة التقييم (أدخل درجات من 0-5 لكل معيار)")
+    print("  [5 = أداء استثنائي, 3 = يفي بالتوقعات, 0 = غير مطبق]")
+    print("="*60)
+    
+    for category, subcriteria in CRITERIA.items():
+        print(f"\n{category}")
+        cat_scores = []
+        cat_examples = []
+        
+        for criterion in subcriteria:
+            while True:
+                try:
+                    score = input(f"  - {criterion} (0-5): ")
+                    score_val = validate_score(score)
+                    if score_val == -1:
+                        print("    !خطأ: أدخل رقمًا بين 0 و5")
+                        continue
+                    
+                    example = input("    مثال/دليل ملموس: ")
+                    if not example.strip():
+                        print("    !تحذير: هذا الحقل مطلوب لتوثيق التقييم")
+                    
+                    cat_scores.append(score_val)
+                    cat_examples.append(example)
+                    break
+                except KeyboardInterrupt:
+                    print("\nتم إيقاف البرنامج")
+                    return
+        
+        scores[category] = cat_scores
+        examples[category] = cat_examples
+    
+    # تحديد معامل الأثر
+    print("\n" + "="*60)
+    print("■ معامل الأثر (تأثير استثنائي)")
+    print("- اختر 1.5 فقط إذا حقق الموظف:")
+    print("  • توفير ≥30% من التكاليف/الوقت")
+    print("  • حل مشكلة مزمنة (عمرها >6 أشهر)")
+    print("  • منع أزمة كبرى")
+    print("="*60)
+    
+    while True:
+        factor = input("معامل الأثر (1.0 أو 1.5): ")
+        if factor in ['1.0', '1.5']:
+            impact_factor = float(factor)
+            break
+        print("!خطأ: أدخل 1.0 أو 1.5 فقط")
+    
+    # إنشاء التقرير
+    report_file = generate_report(employee_data, scores, examples, impact_factor)
+    
+    print("\n" + "="*60)
+    print(f"تم إنشاء التقرير بنجاح: {report_file}")
+    print("="*60)
+    
+    # إنشاء دليل المستخدم
+    user_guide = "دليل_استخدام_نظام_التقييم.txt"
+    with open(user_guide, 'w', encoding='utf-8') as f:
+        f.write("="*60 + "\n")
+        f.write("        دليل استخدام نظام تقييم الموظف المثالي\n")
+        f.write("="*60 + "\n\n")
+        f.write("1. إدخال البيانات:\n")
+        f.write("   - املأ جميع حقول بيانات الموظف الأساسية\n")
+        f.write("   - تأكد من صحة التواريخ (صيغة YYYY/MM/DD)\n\n")
+        f.write("2. مرحلة التقييم:\n")
+        f.write("   - لكل معيار، أدخل درجة من 0 إلى 5\n")
+        f.write("   - وثق كل درجة بمثال واقعي أو دليل ملموس\n")
+        f.write("   - بدون توثيق، يعتبر التقييم لاغيًا\n\n")
+        f.write("3. معامل الأثر:\n")
+        f.write("   - اختر 1.5 فقط عند تحقق شروط التأثير الاستثنائي\n")
+        f.write("   - يجب توثيق حالات معامل 1.5 بتقارير داعمة\n\n")
+        f.write("4. النتائج:\n")
+        f.write("   - يحفظ التقرير تلقائيًا باسم الموظف والتاريخ\n")
+        f.write("   - المجموع الخام الأقصى: 75 نقطة\n")
+        f.write("   - النتيجة النهائية = (المجموع الخام × معامل الأثر) × (100/112.5)\n\n")
+        f.write("5. التواقيع:\n")
+        f.write("   - يجب طباعة التقرير وتوقيعه من 3 جهات\n")
+        f.write("   - التواقيع: المدير المباشر + زميل من قسم آخر + عميل داخلي\n\n")
+        f.write("="*60 + "\n")
+        f.write("الدعم الفني: support@tamayuz-system.com\n")
+        f.write("="*60)
+    
+    print(f"تم إنشاء دليل المستخدم: {user_guide}")
+
+if __name__ == "__main__":
+    main()
